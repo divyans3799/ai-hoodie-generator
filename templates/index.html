@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Hoodie Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { padding: 10px 20px; background-color: #007BFF; color: white; border: none; cursor: pointer; }
+        img { max-width: 100%; height: auto; display: block; margin-top: 20px; border: 1px solid #ccc; }
+        #results { margin-top: 20px; padding: 20px; border: 1px solid #eee; background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>AI Hoodie Generator</h1>
+    <form id="generator-form">
+        <label for="prompt">Enter a prompt:</label>
+        <input type="text" id="prompt" name="prompt" value="cyberpunk lion"><br>
+        <button type="submit">Generate Hoodie</button>
+    </form>
+    <div id="results"></div>
+
+    <script>
+        const form = document.getElementById('generator-form');
+        const resultsDiv = document.getElementById('results');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const prompt = document.getElementById('prompt').value;
+            
+            resultsDiv.innerHTML = "Generating...";
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultsDiv.innerHTML = `
+                        <h2>Generated Product</h2>
+                        <p><strong>Title:</strong> ${data.product_title}</p>
+                        <p><strong>Description:</strong> ${data.product_description}</p>
+                        <p><strong>Mockup URL:</strong> <a href="${data.printful_mockup_url}" target="_blank">${data.printful_mockup_url}</a></p>
+                        <img src="${data.printful_mockup_url}" alt="Product Mockup">
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">Failed to fetch: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
